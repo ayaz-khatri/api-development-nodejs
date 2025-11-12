@@ -7,6 +7,8 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import auth from './middlewares/auth.js'
 import UserRoutes from './routes/users.routes.js';
+import rateLimit from 'express-rate-limit';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -24,9 +26,15 @@ app.use(express.urlencoded({extended: false})); // this allows us to send form-d
 app.use(express.static('public'));              // set the default folder for static files to public
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); 
 
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 100,        // 15 minutes
+    max: 5,
+    message: 'Too many requests from this IP, please try again later.' 
+});
 
 /* --------------------------------- Routes --------------------------------- */
 app.use(cors()); 
+app.use(limiter);
 
 app.use('/api/users', UserRoutes);
 
